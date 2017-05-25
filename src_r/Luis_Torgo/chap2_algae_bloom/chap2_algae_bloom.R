@@ -13,9 +13,9 @@
 ## set working directory
 #setwd("<user>/Desktop/Data Science/Data Mining with R/src_r/Luis_Torgo/chap2_algae_bloom")
 
-## ------------------------------------------------- ##
-## Step-1: load algae bloom dataset from UCI page.   ##
-## --------------------------------------------------##
+## ------------------------------------------------------------ ##
+## <!-- Step-1: load algae bloom dataset from UCI page.     --> ##
+## -------------------------------------------------------------##
 
 ## <!-- option 1: accessing algae dataset from UCI ML webpage  -->
 #install.packages("RCurl")
@@ -34,7 +34,10 @@ library(DMwR)
 head(algae)
 ?algae
 
-## step-2: data visualization and summarization
+
+## ------------------------------------------------------ ##
+## <!-- step-2: data visualization and summarization  --> ##
+## ------------------------------------------------------ ##
 ## FINDINGS:
 ## -- [pp 44]. There are more water samples collected in winter (n_win=62) than in other seasons (n_aut=40; n_spr=53; n_summ=45)
 summary(algae)
@@ -44,10 +47,7 @@ hist(algae$mxPH, probability = F)
 boxplot(algae$oPO4, ylab="Orthophosphate (oPo4)")
 abline(h = mean(algae$oPO4, na.rm = T), lty=2)
 
-## ------------------------------------ ##
-## <!-- falcon_mission 1            --> ##
-## ------------------------------------ ##
-## [pp 49] understanding the distribution of the values of, say, algal a1.
+## -- [falcon_mission 1, pp 49]. understanding the distribution of the values of, say, algal a1.
 library(lattice)
 
 ## FINDINGS:
@@ -71,6 +71,134 @@ min02 <- equal.count(na.omit(algae$mnO2),
                      number=4, overlap=1/5)
 
 
+###########################################
+## <!-- section 2.5: Missing values  --> ##
+###########################################
+nrow(algae[!complete.cases(algae), ])
 
+## -- number of missing values in each row
+apply(algae, 1, function(x) {
+  sum(is.na(x))
+})
+
+## -- 2.5.3: Filling missing values by Exploring correlations
+cor(algae[, 4:18], use = "complete.obs")
+
+## visual representation of corr()
+symnum(cor(algae[, 4:18], use = "complete.obs"))
+
+## -- conditional Histogram
+library(lattice)
+histogram(~ mxPH | season, data = algae)
+
+## adjust ordering of season
+## -- FINDINGS:
+##    - The values of mxPH are not seriously influenced by the season of the year when the samples were collected.
+algae$season <- factor(algae$season, levels = c("spring", "summer", "autumn", "winter"))
+histogram(~ mxPH | season, data = algae)
+
+## by size of river
+## -- FINDINGS:
+##    - we can observe a tendency for smaller rivers to show lower values of mxPH.
+algae$size <- factor(algae$size, levels = c("small", "medium", "large"))
+histogram(~ mxPH | size, data = algae)
+
+## adding more nominal variables
+## -- FINDINGS: 
+##    - It is curious to note that there is no information regarding small rivers with low speed.
+algae$speed <- factor(algae$speed, levels = c("low", "medium", "high"))
+histogram(~ mxPH | size * speed, data = algae)
+
+## scatter plot between contineous and nominal variables
+## -- NOTE:
+##    - The jitter=T parameter setting is used to perform 
+##      a small random permutation of the values in the Y-direction 
+##      to avoid plotting observations with the same values over each other, 
+##      thus losing some information on the concentration of observations with 
+##      some particular value.
+stripplot(size ~ mxPH | speed, data = algae, jitter=T)
+
+
+## --------------------------------------------------- ##
+## <!-- section 2.6: Obtaining Prediction Models.  --> ##
+## --------------------------------------------------- ##
+
+## --------------------------------------------------- ##
+## -- section 2.6.1: Multiple Linear Regression        ##
+## --------------------------------------------------- ##
+
+## -- preprocessing data for MLR
+data("algae")
+algae <- algae[-manyNAs(algae), ]
+## -- NOTE:
+##    - After executing this code we have a data frame, clean.algae, that has no missing variable values.
+clean.algae <- knnImputation(algae, k = 10)
+
+## -- predicting algae type A1
+lm.a1 <- lm(a1 ~ ., data = clean.algae[, 1:12])
+summary(lm.a1)
+
+## -- simplifying the linear model using the anova() function
+## -- NOTE:
+##    - When applied to a single linear model, this function will give us a 
+##     sequential analysis of variance of the model fit. That is, the reductions 
+##     in the residual sum of squares (the total error of the model) as each term 
+##     of the formula is added in turn.
+anova(object = lm.a1)
+
+## -- CONCLUSIONS: 
+##    - These results indicate that the variable season is the variable 
+##      that least contributes to the reduction of the fitting error of the model.
+
+## Let us remove season from the model
+lm2.a1 <- update(object = lm.a1, formula. = . ~ . - season)
+summary(lm2.a1)
+
+anova(lm.a1, lm2.a1)
+
+## -- backward elimination
+## -- NOTE:
+##    - The function step() uses the Akaike Information Criterion to perform model 
+##      search. The search uses backward elimination by default, but with the 
+##      parameter direction you may use other algorithms (check the help of this 
+##      function for further details).
+#final.lm <- step(object = lm.a1)
+final.lm <- step(object = lm.a1, direction = "backward")
+summary(final.lm)
+
+
+## ------------------------------------------------------------- ##
+## -- section 2.6.2: Regression Trees (Breiman et al., 1984)     ##
+## ------------------------------------------------------------- ##
+
+## -- NOTE:
+##    - As these models handle datasets with missing values, we only need to 
+##      remove samples 62 and 199 for the reasons mentioned before.
+library(rpart)
+
+data(algae)
+algae <- algae[-manyNAs(algae), ]
+
+## -- fit regression trees
+## -- NOTE:
+##    - rpart (Therneau and Atkinson, 2010)
+rt.a1 <- rpart(a1 ~ ., data = algae[, 1:12])
+rt.a1
+
+## -- graphical representation of the tree
+prettyTree(rt.a1)
+
+
+## ----------------------------------- ##
+## <!-- To BE CONTINUED (rpart)  -->   ##
+## ----------------------------------- ##
+
+
+
+## -------------------------------------------------- ##
+## -- section 2.7: Model Evaluation and Selection     ##
+## -------------------------------------------------- ##
+lm.pred.a1 <- predict(final.lm, newdata = clean.algae)
+rt.pred.a1 <- predict(rt.a1, newdata = algae)
 
 
