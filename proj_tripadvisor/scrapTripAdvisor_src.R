@@ -6,6 +6,7 @@ scrapTripAdvisor <- function(country = NULL, serv_type = NULL, serv_code,
   ##                      Flights, etc)
   ## -----------------------------------------------------------------------------
   
+  require(rvest)
   
   ## --------------------------------- ##
   ## <!-- Calling to TripAdvisor   --> ##
@@ -27,19 +28,31 @@ scrapTripAdvisor <- function(country = NULL, serv_type = NULL, serv_code,
   name <- trip.advisor%>%html_nodes(".listing_title .property_title")%>%html_text()
   rank <- trip.advisor%>%html_nodes(".recRanking .slim_ranking")%>%html_text()
   # price <- trip.advisor%>%html_nodes(".fullPrice span .xthrough_good")%>%html_text()    ## not working
-  rating <- trip.advisor%>%html_nodes("")%>%html_text()    ## not working
   
+#   reviews_urls <- trip.advisor%>%html_nodes(".ratingReview a")%>%html_attr("href")    ## not working
+#   reviews_links <- trip.advisor%>%html_nodes(".ratingReview a")%>%html_text() 
+  # reviews_urls <- trip.advisor%>%html_nodes(xpath = '//*[@id="HOTELDEAL7379267"]/div/div/div[4]/div[1]/div[1]/span')%>%html_attr("href")
   
-  ## -- pre-processing data
-  library(stringr)
-  qwe <- as.numeric(str_match(rank, "#([0-9]{1}|[0-9]{2}) ")[,2])
+#   reviews_urls <- trip.advisor%>%html_nodes(".rtofimg .statsLine.easyClear .ratingReview span a")%>%html_attr("href")
+#   reviews_links <- trip.advisor%>%html_nodes(".rtofimg .statsLine.easyClear .ratingReview span a")%>%html_text()
   
-  ## -- create dataframe of top site rankings
-  trip.advisor.table <- data.frame()
+  reviews_urls <- trip.advisor%>%html_nodes("#HOTELDEAL .rtofimg .statsLine.easyClear .ratingReview span a")%>%html_attr("href")
+  reviews_links <- trip.advisor%>%html_nodes(".rtofimg .statsLine.easyClear .ratingReview span")%>%html_text()
+  
+#   url <- "http://www.tripadvisor.com/Hotel_Review-g37209-d1762915-Reviews-JW_Marriott_Indianapolis-Indianapolis_Indiana.html"
+#   
+#   reviews <- url %>%
+#     read_html() %>%
+#     html_nodes("#REVIEWS .innerBubble")
   
   ## ------------------------------ ##
   ## <!-- Pre-processing data.  --> ##
   ## ------------------------------ ##
+  library(stringr)
+  rank <- as.numeric(str_match(rank, "#([0-9]{1}|[0-9]{2}) ")[,2])
+  
+  ## -- create dataframe of top site rankings
+  trip.advisor.table <- data.frame(, stringsAsFactors = FALSE)
   
   
   trip.advisor.table <- trip.advisor.table[order(ttrip.advisor.table$rank), ]
