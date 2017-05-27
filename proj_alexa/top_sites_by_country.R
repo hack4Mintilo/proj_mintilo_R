@@ -1,6 +1,6 @@
 
 ## -- set current working directory
-user <- "workuhm"
+user <- "<user>"
 cwd <- paste("/Users/", user, "/Desktop/Data Science/Data Mining with R/proj_mintilo_R/proj_alexa", 
              sep = "")
 setwd(cwd)
