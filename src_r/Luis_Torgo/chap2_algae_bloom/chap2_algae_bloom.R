@@ -198,7 +198,54 @@ prettyTree(rt.a1)
 ## -------------------------------------------------- ##
 ## -- section 2.7: Model Evaluation and Selection     ##
 ## -------------------------------------------------- ##
-lm.pred.a1 <- predict(final.lm, newdata = clean.algae)
+lm.pred.a1 <- predict(final.lm, newdata = algae)
 rt.pred.a1 <- predict(rt.a1, newdata = algae)
+
+## -- mean absolute error (MAE)
+(mae.lm.a1 <- mean(abs(lm.pred.a1 - algae[, "a1"])))
+(mae.rt.a1 <- mean(abs(rt.pred.a1 - algae[, "a1"])))
+
+## -- mean squared error (MSE)
+## -- NOTE:
+##    - MSE statistic has the disadvantage of not being measured in the same units 
+##      as the target variable, and thus being less interpretable from the user 
+##      perspective. Even if we use the MAE statistic, we can ask ourselves the 
+##      question whether the scores obtained by the models are good or bad.
+(mse.lm.a1 <- mean((lm.pred.a1 - algae[, "a1"])^2))
+(mse.rt.a1 <- mean((rt.pred.a1 - algae[, "a1"])^2))
+
+## -- normalized mean squared error (NMSE)
+## -- NOTE:
+##    - The NMSE is a unit-less error measure with values usually ranging 
+##      from 0 to 1. If your model is performing better than this very simple 
+##      baseline predictor, then the NMSE should be clearly less than 1. 
+##      The smaller the NMSE, the better. Values grater than 1 mean that your model 
+##      is performing worse than simply predicting always the average for all cases!
+(nmse.lm.a1 <- mean((lm.pred.a1 - algae[, "a1"])^2) / 
+               mean((mean(algae[, "a1"]) - algae[, "a1"])^2) )
+
+(nmse.rt.a1 <- mean((rt.pred.a1 - algae[, "a1"])^2) / 
+               mean((mean(algae[, "a1"]) - algae[, "a1"])^2) )
+
+## -- books package (regr.eval)
+regr.eval(trues = algae[, "a1"], preds = lm.pred.a1, train.y = algae[, "a1"])
+regr.eval(trues = algae[, "a1"], preds = rt.pred.a1, train.y = algae[, "a1"])
+
+## -- PLOT: errors scatter plot
+## -- FINDINGS:
+##    - Looking at Figure 2.10 (left) with the predictions of the linear model, 
+##      we can see that this model predicts negative algae frequencies for some 
+##      cases. In this application domain, it makes no sense to say that the 
+##      occurrence of an alga in a water sample is negative (at most, it can be zero).
+old.par <- par(mfrow = c(1, 2))
+plot(lm.pred.a1, algae[, "a1"], main = "Linear Model", 
+     xlab = "Predictions", ylab = "True values", 
+     abline(0, 1, lty = 2))
+plot(rt.pred.a1, algae[, "a1"], main = "Regression Tree", 
+     xlab = "Predictions", ylab = "True values",
+     abline(0, 1, lty = 2))
+par(old.par)
+
+
 
 

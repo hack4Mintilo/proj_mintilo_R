@@ -6,7 +6,8 @@ library(rvest)
 ## read in HTML page
 imdb <- read_html("http://www.imdb.com/movies-in-theaters/?ref_=nv_tp_inth_1")
 
-## get attributes of the page
+## -- get attributes of the page --
+##    - SOURCE: using http://selectorgadget.com/ extension in Chrome
 title <- imdb%>%html_nodes("h4 a")%>%html_text()
 time <- imdb%>%html_nodes("p time")%>%html_text()
 genere <- imdb%>%html_nodes("time+span")%>%html_text()

@@ -1,0 +1,2 @@
+
+sapply(country_all, class)   ## check class type of all variables in data frame
