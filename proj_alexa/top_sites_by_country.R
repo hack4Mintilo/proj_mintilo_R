@@ -40,56 +40,25 @@ write.xlsx(x = country_all_filter, file = "./country_all_filter.xlsx", sheetName
            row.names = FALSE, col.names = TRUE)
 
 
-##
+## Get info for a specific country, ET
+country_ET <- country_all_filter[country_all_filter$alpha2Code == "ET", ]
 
 ## --------------------------------------------------- ##
 ## <!-- Scraping Alexa for top websites by country --> ##
 ## --------------------------------------------------- ##
 library(rvest)
 
-## url
-url <- paste("http://www.alexa.com/topsites/countries/", country, sep = "")
+## load talk2Alexa source file
+source("./scrapAlexa_src.R")
 
-## load the page
-top_sites <- read_html(url)
+## country = Ethiopia (ET)
+# scrapAlexa(country = "Ethiopia", is_region = TRUE, region = "Africa", is_exp = TRUE)
 
-## get attributes
-rank <- top_sites%>%html_nodes("div div .number")%>%html_text()
-site <- top_sites%>%html_nodes(".DescriptionCell p a")%>%html_text()
-site_desc <- top_sites%>%html_nodes(".DescriptionCell .description")%>%html_text()
-daily_time_on_site <- top_sites%>%html_nodes(".DescriptionCell+ .right p")%>%html_text()
-daily_pageviews_per_visitor <- top_sites%>%html_nodes(".right:nth-child(4) p")%>%html_text()
-percent_of_traffic_from_search <- top_sites%>%html_nodes(".right:nth-child(5) p")%>%html_text()
-total_sites_linking_in <- top_sites%>%html_nodes(".right:nth-child(6) p")%>%html_text()
+# borders <- c("ET", "DJ", "KE", "SO", "SD")     ## no info for Eritrea (ER)
+borders <- substr(country_all_filter[country_all_filter$alpha3Code == "ETH", ]$borders, 
+                  start = 1, stop = 2)
 
-top_sites_table <- data.frame(rank=rank, site=site, site_desc, 
-                              daily_time_on_site, daily_pageviews_per_visitor, 
-                              percent_of_traffic_from_search, total_sites_linking_in)
-
-## -- pre-processing data
-# library(stringr)   ## used for multiple pattern replacement
-
-top_sites_table$rank <- as.numeric(top_sites_table$rank)
-
-top_sites_table$site_desc <- gsub(pattern = "\n", replacement = "", top_sites_table$site_desc)
-top_sites_table$site_desc <- gsub(pattern = "Less", replacement = "", top_sites_table$site_desc)
-
-top_sites_table$site_desc <- as.character(top_sites_table$site_desc)
-# top_sites_table$site_desc <- sub(pattern = "^$", replacement = "NA", top_sites_table$site_desc)
-# top_sites_table$site_desc
-# top_sites_table$site_desc <- str_replace_all(string = top_sites_table$site_desc, pattern = c("\n", "Less"), replacement = "")
-
-top_sites_table$daily_time_on_site <- gsub(pattern = ":", replacement = ".", 
-                                           top_sites_table$daily_time_on_site)
-
-top_sites_table$daily_time_on_site <- as.numeric(top_sites_table$daily_time_on_site)
-top_sites_table <- top_sites_table[order(top_sites_table$rank), ]
-
-## export data 
-library(xlsx)
-# write.csv(x = top_sites_table, file = "./top_sites_by_country.csv", 
-#           row.names = FALSE, header = TRUE, na = "")
-write.xlsx(x = top_sites_table, file = "./top_sites_by_country.xlsx", sheetName = "TopSitesByCountry", 
-           row.names = FALSE, col.names = TRUE)
-
-
+for (border in borders) {
+  
+  scrapAlexa(country = border, is_regional = FALSE, is_exp = TRUE)
+}
