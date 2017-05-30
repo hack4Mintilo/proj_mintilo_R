@@ -1,0 +1,25 @@
+//*[@id="mw-content-text"]/table[2]
+//*[@id="mw-content-text"]/table[3]
+//*[@id="mw-content-text"]/table[4]
+
+//*[@id="toc"]/ul/li[3]/a
+
+//*[@id="mw-content-text"]/div[2]
+
+'//*[@id='mw-content-text']/table[1]
+
+
+
+## define list of tables available in Wikipedia
+  ## - 1: Outdoor, Men; 2: Outdoor, Women; 3: Indoor, Men; 4: Indoor, Women
+  tbl_list <- c(1:4)
+
+  ## loop through all tables
+  for (tbl in tbl_list) {
+
+    ## get specific table
+    ## - E.g., //*[@id="mw-content-text"]/table[2]
+#     tbl_xpath <- paste("'", "//*[@id=", "\"mw-content-text\"", "]/table[", tbl, "]'",
+#                        sep = "")
+    tbl_xpath <- paste("//*[@id=", "\"mw-content-text\"", "]/table[", tbl, "]",
+                       sep = "")

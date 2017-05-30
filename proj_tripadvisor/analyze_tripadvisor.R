@@ -12,6 +12,15 @@ setwd(cwd)
 ## --------------------------------------------------- ##
 library(rvest)
 
-## load talk2Alexa source file
+## get hotel's rank
 source("./scrapTripAdvisor_src.R")
+
+trip_advisor_table <- scrapTripAdvisor(country = "Ethiopia", serv_type = "Hotels", serv_code = "g293790", 
+                                       ext_serv_type = "Hotels", is_exp = TRUE)
+head(trip_advisor_table)
+
+## get customer's reviews
+source("./getReview_tripAdvisor_src.R")
+
+
   
