@@ -44,11 +44,63 @@ scrapWikipedia_recordAthletics <- function () {
                                                       records_athletics_indoorM, records_athletics_indoorF))
   
   ## export raw combined datasets
-  write.xlsx(x = records_athletics_table, file = "./records_athletics_table.xlsx", sheetName = "records_athletics_table", 
+  write.xlsx(x = records_athletics_table, file = "./records_athletics_table_raw.xlsx", sheetName = "records_athletics_table_raw", 
              row.names = FALSE, col.names = TRUE)
   
-  ## pre-process the imported data
+  
+  ## ------------------------------------------------- ##
+  ## <!-- Step-3: Pre-process the messy web data.  --> ##
+  ## ------------------------------------------------- ##
+  library(stringr)
+  
   # records_athletics_table$Event <- as.numeric(records_athletics_table$Event)    ## first, keep only numeric values...
+  
+  ## drop records with no record time available
+  records_athletics_table <- records_athletics_table[!(is.na(records_athletics_table$Record) | records_athletics_table$Record==""), ]
+  
+  ## drop competition which has strange values under Date column
+  # records_athletics_table$Date <- ifelse(str_detect(records_athletics_table$Date, "thlon\\>"), "", records_athletics_table$Date)   ## not working
+  
+  ## -- split the data
+  # records_athletics_table$category <- ifelse(str_detect(records_athletics_table$Event, "\\d+[ m|km]"), "main", "others")
+#   if (str_detect(records_athletics_table$Event, "\\d+\\s{1}[m|km]")) {     
+#     records_athletics_table$category <- "main"
+#   } 
+#   else if (str_detect(records_athletics_table$Event, "Marathon")) {
+#     records_athletics_table$category <- "Marathon"
+#   }
+  
+  ## get category of the competition
+  records_athletics_table$category <- ifelse(str_detect(records_athletics_table$Event, "\\d+\\s{1}[m|km]"), "main", "others")
+  records_athletics_table$category <- ifelse(str_detect(records_athletics_table$Event, "mara|Mara"), "Marathon", records_athletics_table$category)
+  records_athletics_table$category <- ifelse(str_detect(records_athletics_table$Event, "hurdles|steeplechase|walk|relay"), "others", records_athletics_table$category)
+  
+  ## split dataset by main vs others
+  records_athletics_table_main <- records_athletics_table[records_athletics_table$category %in% c("main", "Marathon"), ]
+  
+  
+  ## ----------------------------------------------------------- ##
+  ## <!-- Step-4: Further pre-process of the main web data.  --> ##
+  ## ----------------------------------------------------------- ##
+  ## get additional info about the competition, e.g., kind of units (m, km, etc) and category
+  records_athletics_table_main$units <- unlist(str_extract_all(records_athletics_table_main$Event, "[[:alpha:] ()]{2,}"))      ## E.g., 100 m -> unit=m; mile -> mile; 5 km (road) -> km (road)
+  records_athletics_table_main$units <- str_trim(records_athletics_table_main$units)
+  
+  if (substr(records_athletics_table_main$units, 1, 1) == "m") {
+#     records_athletics_table_main$distance <- ifelse(str_detect(records_athletics_table_main$Event, "\\d+"), 
+#                                                     as.numeric(unlist(str_extract(records_athletics_table_main$Event, "\\d+"))), 
+#                                                     NA)
+    records_athletics_table_main$distance <- as.numeric(unlist(str_extract(records_athletics_table_main$Event, "\\d+")))
+  }
+  
+  ## export raw combined datasets
+  write.xlsx(x = records_athletics_table, file = "./records_athletics_table.xlsx", sheetName = "records_athletics_table", 
+             row.names = FALSE, col.names = TRUE)
+  write.xlsx(x = records_athletics_table_main, file = "./records_athletics_table_main.xlsx", sheetName = "records_athletics_table_main", 
+             row.names = FALSE, col.names = TRUE)
   
   
 }
+  
+  
+  
