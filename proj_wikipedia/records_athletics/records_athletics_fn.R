@@ -121,6 +121,8 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_table_main$distance_category <- ifelse(records_athletics_table_main$distance <= 1000, "short", 
                                                     ifelse(((records_athletics_table_main$distance > 1000) & (records_athletics_table_main$distance <= 10000)), "middle", 
                                                     ifelse((records_athletics_table_main$distance > 10000), "long", NA)))
+  records_athletics_table_main$distance_category <- factor(records_athletics_table_main$distance_category, 
+                                                           levels = c("short", "middle", "long"))
   
   ## export raw combined datasets
   write.xlsx(x = records_athletics_table_main, file = "./records_athletics_table_main.xlsx", sheetName = "records_athletics_table_main", 

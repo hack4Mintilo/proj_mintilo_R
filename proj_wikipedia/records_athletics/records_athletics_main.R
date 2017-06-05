@@ -46,7 +46,11 @@ main_plt <- ggplot(data = records_athletics_all,
 main_plt
 
 # Divide by levels of "distance_category", in the horizontal direction
-main_plt + facet_grid(. ~ sex)
+# main_plt + facet_grid(distance_category ~ sex) 
+main_plt + facet_wrap(distance_category ~ sex, ncol = 2, scales = "free")
+
+# Divide by levels of "sex", in the horizontal direction
+# main_plt + facet_grid(. ~ sex)
 
 
 
