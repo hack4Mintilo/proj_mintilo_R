@@ -14,6 +14,8 @@ library(stringr)     ## for string manipulation
 library(lubridate)   ## for date manipulation
 library(ggplot2)     ## for ploting
 library(reshape2)    ## for getting your data in the format ggplot2 would like
+library(ggmap)       ## for getting longitude/latitude of a city
+
 
 ## load main function(s)
 source("./records_athletics_fn.R")
@@ -47,14 +49,18 @@ main_plt
 
 # Divide by levels of "distance_category", in the horizontal direction
 # main_plt + facet_grid(distance_category ~ sex) 
-main_plt + facet_wrap(distance_category ~ sex, ncol = 2, scales = "free")
-
-# Divide by levels of "sex", in the horizontal direction
-# main_plt + facet_grid(. ~ sex)
+final_plt <- main_plt + facet_wrap(distance_category ~ sex, ncol = 2, scales = "free")
+final_plt
 
 ## -- save the plot
-ggsave("./plt_distribution_records_by_sex_and_distance-category.png", device = "png")
+# ggsave("./plt_distribution_records_by_sex_and_distance-category.png", 
+#        final_plt, scale = 2, device = "png")
 
+# ggsave("./plt_distribution_records_by_sex_and_distance-category_pdf.pdf", 
+#        final_plt, scale = 2, device = "pdf")
+
+ggsave("./plt_distribution_records_by_sex_and_distance-category_new2.png", 
+       final_plt, width = 30, height = 20, units = "cm")
 
 
 

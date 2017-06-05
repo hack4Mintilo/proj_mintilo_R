@@ -1,2 +1,9 @@
 
 sapply(country_all, class)   ## check class type of all variables in data frame
+
+## embed plots in wordpress post
+<img class="aligncenter size-full wp-image-15251"
+  src="http://awash-analytics.info/wp-content/uploads/2017/06/plt_distribution_records_by_sex_and_distance-category_new2.png"
+  alt=""
+  width="735" height="841"
+  sizes="(max-width: 735px) 100vw, 735px">

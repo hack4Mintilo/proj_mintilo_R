@@ -82,6 +82,21 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_table$month <- month(records_athletics_table$Date_recorded)
   records_athletics_table$day <- day(records_athletics_table$Date_recorded)
   
+  ## -- get city and country where the event was.
+  records_athletics_table$country <- str_extract(records_athletics_table$Place, "[^,]*$")
+  records_athletics_table$country <- str_trim(records_athletics_table$country)
+     
+  records_athletics_table$city <- str_extract(records_athletics_table$Place, "[^,]*")     ## get string before comma sign
+  records_athletics_table$city <- str_trim(records_athletics_table$city)
+  
+  ## -- get longitude/latitude of a city
+#   records_athletics_table$lon <- geocode(records_athletics_table$city)[1]
+#   records_athletics_table$lat <- geocode(records_athletics_table$city)[2]
+  
+  records_athletics_table$lon <- geocode(records_athletics_table$country)[1]
+  records_athletics_table$lat <- geocode(records_athletics_table$country)[2]
+  
+  
   ## export dataframe with all competitions
   write.xlsx(x = records_athletics_table, file = "./records_athletics_table.xlsx", sheetName = "records_athletics_table", 
              row.names = FALSE, col.names = TRUE)
