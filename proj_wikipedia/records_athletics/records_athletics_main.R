@@ -52,6 +52,11 @@ main_plt + facet_wrap(distance_category ~ sex, ncol = 2, scales = "free")
 # Divide by levels of "sex", in the horizontal direction
 # main_plt + facet_grid(. ~ sex)
 
+## -- save the plot
+ggsave("./plt_distribution_records_by_sex_and_distance-category.png", device = "png")
+
+
+
 
 
 
