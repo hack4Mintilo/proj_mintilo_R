@@ -24,7 +24,6 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_indoorM <- records_athletics_indoorM[, !names(records_athletics_indoorM) %in% c("Video")]
   records_athletics_indoorF <- records_athletics_indoorF[, !names(records_athletics_indoorF) %in% c("Video")]
   
-  
   ## -- export raw datasets 
   write.xlsx(x = records_athletics_outdoorM, file = paste("./records_athletics_outdoorM","_",country,".xlsx", sep = ""), sheetName = "records_athletics_outdoorM", 
              row.names = FALSE, col.names = TRUE)
@@ -77,6 +76,12 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_table$category <- ifelse(str_detect(records_athletics_table$Event, "mara|Mara"), "Marathon", records_athletics_table$category)
   records_athletics_table$category <- ifelse(str_detect(records_athletics_table$Event, "mile|miles|hurdles|steeplechase|walk|relay"), "others", records_athletics_table$category)
   
+  ## -- manipulate date value to get year, month and day
+  records_athletics_table$Date_recorded <- as.Date(records_athletics_table$Date, "%d %b %Y")
+  records_athletics_table$year <- year(records_athletics_table$Date_recorded)                  ## handled by lubridate pkg
+  records_athletics_table$month <- month(records_athletics_table$Date_recorded)
+  records_athletics_table$day <- day(records_athletics_table$Date_recorded)
+  
   ## export dataframe with all competitions
   write.xlsx(x = records_athletics_table, file = "./records_athletics_table.xlsx", sheetName = "records_athletics_table", 
              row.names = FALSE, col.names = TRUE)
@@ -111,6 +116,11 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_table_main$distance <- ifelse(records_athletics_table_main$units %in% c("Marathon"), 
                                                   42*1000, 
                                                   records_athletics_table_main$distance)
+  
+  ## derive distance category
+  records_athletics_table_main$distance_category <- ifelse(records_athletics_table_main$distance <= 1000, "short", 
+                                                    ifelse(((records_athletics_table_main$distance > 1000) & (records_athletics_table_main$distance <= 10000)), "middle", 
+                                                    ifelse((records_athletics_table_main$distance > 10000), "long", NA)))
   
   ## export raw combined datasets
   write.xlsx(x = records_athletics_table_main, file = "./records_athletics_table_main.xlsx", sheetName = "records_athletics_table_main", 
