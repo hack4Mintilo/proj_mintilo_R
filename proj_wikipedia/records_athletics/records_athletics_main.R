@@ -19,6 +19,7 @@ library(ggmap)       ## for getting longitude/latitude of a city
 
 ## load main function(s)
 source("./records_athletics_fn.R")
+source("./get_geoLocation_fn.R")
 
 ## scrap records hold by Ethiopian athletes
 records_athletics_eth <- scrapWikipedia_recordAthletics(country = "Ethiopian")
@@ -28,7 +29,8 @@ records_athletics_ken <- scrapWikipedia_recordAthletics(country = "Kenyan")
 
 ## combine dataframes for analysis purpose
 records_athletics_all <- as.data.frame(rbind.fill(records_athletics_eth, records_athletics_ken))
-records_athletics_all <- records_athletics_all[, c("Event", "Athlete", "comp_doorInOut", "sex", "Athlete_profile", "category", "year", "distance", "distance_category")]
+records_athletics_all <- records_athletics_all[, c("Event", "Athlete", "comp_doorInOut", "sex", "Athlete_profile", "category", "year", "distance", "distance_category", 
+                                                   "country", "city")]
 
 
 ## ----------------------------------------------- ##
@@ -63,6 +65,12 @@ ggsave("./plt_distribution_records_by_sex_and_distance-category_new2.png",
        final_plt, width = 30, height = 20, units = "cm")
 
 
+## ------------------------------------------------------------------------ ##
+## <!-- Analyze geographical location of world athletics records.       --> ##
+## ------------------------------------------------------------------------ ##
 
+## -- get longitude/latitude of a city/country
+geo_country <- get_geoLocation(dsin = records_athletics_all, place = "country")
+geo_city <- get_geoLocation(dsin = records_athletics_all, place = "city")
 
 
