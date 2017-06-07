@@ -25,13 +25,13 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_indoorF <- records_athletics_indoorF[, !names(records_athletics_indoorF) %in% c("Video")]
   
   ## -- export raw datasets 
-  write.xlsx(x = records_athletics_outdoorM, file = paste("./records_athletics_outdoorM","_",country,".xlsx", sep = ""), sheetName = "records_athletics_outdoorM", 
+  write.xlsx(x = records_athletics_outdoorM, file = paste("./outputs/tables/records_athletics_outdoorM","_",country,".xlsx", sep = ""), sheetName = "records_athletics_outdoorM", 
              row.names = FALSE, col.names = TRUE)
-  write.xlsx(x = records_athletics_outdoorF, file = paste("./records_athletics_outdoorF","_",country,".xlsx", sep = ""), sheetName = "records_athletics_outdoorF", 
+  write.xlsx(x = records_athletics_outdoorF, file = paste("./outputs/tables/records_athletics_outdoorF","_",country,".xlsx", sep = ""), sheetName = "records_athletics_outdoorF", 
              row.names = FALSE, col.names = TRUE)
-  write.xlsx(x = records_athletics_indoorM, file = paste("./records_athletics_indoorM","_",country,".xlsx", sep = ""), sheetName = "records_athletics_indoorM", 
+  write.xlsx(x = records_athletics_indoorM, file = paste("./outputs/tables/records_athletics_indoorM","_",country,".xlsx", sep = ""), sheetName = "records_athletics_indoorM", 
              row.names = FALSE, col.names = TRUE)
-  write.xlsx(x = records_athletics_indoorF, file = paste("./records_athletics_indoorF","_",country,".xlsx", sep = ""), sheetName = "records_athletics_indoorF", 
+  write.xlsx(x = records_athletics_indoorF, file = paste("./outputs/tables/records_athletics_indoorF","_",country,".xlsx", sep = ""), sheetName = "records_athletics_indoorF", 
              row.names = FALSE, col.names = TRUE)
   
   
@@ -47,7 +47,7 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   
   ## export raw combined datasets
   records_athletics_table_raw$Athlete_profile <- country
-  write.xlsx(x = records_athletics_table_raw, file = "./records_athletics_table_raw.xlsx", sheetName = "records_athletics_table_raw", 
+  write.xlsx(x = records_athletics_table_raw, file = "./outputs/tables/records_athletics_table_raw.xlsx", sheetName = "records_athletics_table_raw", 
              row.names = FALSE, col.names = TRUE)
   
   
@@ -83,15 +83,18 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_table$day <- day(records_athletics_table$Date_recorded)
   
   ## -- get city and country where the event was.
-  records_athletics_table$city <- str_extract(records_athletics_table$Place, "[^,]*")    
+  records_athletics_table$city <- str_extract(records_athletics_table$Place, "[^,]*")      ## string value is separated by comma  
   records_athletics_table$city <- str_trim(records_athletics_table$city)
   
   records_athletics_table$country <- str_extract(records_athletics_table$Place, "[^,]*$")
   records_athletics_table$country <- str_trim(records_athletics_table$country)
   
+  ## -- get first/last name of athelets
+  records_athletics_table$fname <- str_trim(str_extract(records_athletics_table$Athlete, "[^\\s+]*"))    ## string value is separated by space
+  records_athletics_table$lname <- str_trim(str_extract(records_athletics_table$Athlete, "[^\\s+]*$"))
   
   ## export dataframe with all competitions
-  write.xlsx(x = records_athletics_table, file = "./records_athletics_table.xlsx", sheetName = "records_athletics_table", 
+  write.xlsx(x = records_athletics_table, file = "./outputs/tables/records_athletics_table.xlsx", sheetName = "records_athletics_table", 
              row.names = FALSE, col.names = TRUE)
   
   ## get main types of competitions
@@ -132,8 +135,13 @@ scrapWikipedia_recordAthletics <- function (country = NULL) {
   records_athletics_table_main$distance_category <- factor(records_athletics_table_main$distance_category, 
                                                            levels = c("short", "middle", "long"))
   
+  ## -- get country code, powered by pkg: countrycode
+  # print(records_athletics_table_main[,c("Place", "country")])
+  records_athletics_table_main$country_code <- countrycode(sourcevar = records_athletics_table_main$country, origin = 'country.name', destination = 'iso3c')
+  
+  
   ## export raw combined datasets
-  write.xlsx(x = records_athletics_table_main, file = "./records_athletics_table_main.xlsx", sheetName = "records_athletics_table_main", 
+  write.xlsx(x = records_athletics_table_main, file = "./outputs/tables/records_athletics_table_main.xlsx", sheetName = "records_athletics_table_main", 
              row.names = FALSE, col.names = TRUE)
   
   return(records_athletics_table_main)  

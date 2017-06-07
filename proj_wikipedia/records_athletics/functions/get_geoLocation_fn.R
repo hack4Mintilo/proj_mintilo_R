@@ -20,8 +20,10 @@ get_geoLocation <- function (dsin = NULL, place_type = NULL) {
                          paste("lat", "_", place_type, sep = ""))
   
   ## export geo-location data to external drive
-  file_name <- paste("geoLocation", "_", place_type, ".xlsx", sep = "")
-  write.xlsx(x = geo_res, file = file_name, sheetName = file_name,
+  file_name <- paste("./outputs/tables/geoLocation", "_", place_type, ".xlsx", sep = "")
+  sheet_name <- paste("geolocation_", place_type, sep = "")
+  
+  write.xlsx(x = geo_res, file = file_name, sheetName = sheet_name,
              row.names = FALSE, col.names = TRUE)
   
   return(geo_res)
