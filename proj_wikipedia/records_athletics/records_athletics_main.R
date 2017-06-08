@@ -20,13 +20,16 @@ library(tm)          ## needed by word-cloud pkg
 library(SnowballC)   ## needed by word-cloud pkg
 library(wordcloud)   ## for analyzing string using word-cloud
 
-library(countrycode)
-
+library(countrycode)  ## needed for recoding country name
+library(sqldf)        ## needed for merging tables with SQL syntax
+library(maps)         ## for worldmap
 
 ## load main function(s)
 source("./functions/records_athletics_fn.R")
 source("./functions/get_geoLocation_fn.R")
+source("./functions/get_geoLocation_data_fn.R")
 source("./functions/get_wordcloud_fn.R")
+source("./functions/get_mapAthletes_fn.R")
 
 ## scrap records hold by Ethiopian athletes
 records_athletics_eth <- scrapWikipedia_recordAthletics(country = "Ethiopian")
@@ -73,22 +76,35 @@ ggsave("./outputs/plots/plt_distribution_records_by_sex_and_distance-category.pn
 
 
 ## ------------------------------------------------------------------------ ##
-## <!-- Analyze geographical location of world athletics records.       --> ##
-## ------------------------------------------------------------------------ ##
-
-## -- get longitude/latitude of a city/country
-geo_country <- get_geoLocation(dsin = records_athletics_all, place = "country")
-geo_city <- get_geoLocation(dsin = records_athletics_all, place = "city")
-
-
-
-## ------------------------------------------------------------------------ ##
 ## <!-- Analyze athlete's first/last names using word-cloud.            --> ##
 ## ------------------------------------------------------------------------ ##
 get_wordcloud(dsin = records_athletics_all, min_freq = 1, varin = "fname")
+get_wordcloud(dsin = records_athletics_all, min_freq = 1, varin = "lname")
 get_wordcloud(dsin = records_athletics_all, min_freq = 1, varin = "city")
 # get_wordcloud(dsin = records_athletics_all, min_freq = 1, varin = "country")
 get_wordcloud(dsin = records_athletics_all, min_freq = 1, varin = "country_code")
 
 
+## ------------------------------------------------------------------------ ##
+## <!-- Analyze geographical location of world athletics records.       --> ##
+## ------------------------------------------------------------------------ ##
+## -- get geo-location data
+geoLoc_country <- get_geoLocation_data(dsin = records_athletics_all, loc_type = "country") 
+geoLoc_city <- get_geoLocation_data(dsin = records_athletics_all, loc_type = "city") 
+
+## -- add geo-location info to main analysis dataset
+records_athletics_all2 <- sqldf("SELECT A.*, B.lon_country, B.lat_country, C.lon_city, C.lat_city 
+                                 FROM records_athletics_all AS A 
+                                 LEFT JOIN geoLoc_country AS B 
+                                 ON A.country = B.country 
+                                 LEFT JOIN geoLoc_city AS C 
+                                 ON A.city = C.city")
+
+## -- Worldmap with Athletes profile
+get_mapAthelets(dsin = records_athletics_all2, varin = "Athlete_profile", country_baseline = "Ethiopian", 
+                db_sel = "world", lon_in = "lon_country", lat_in = "lat_country")
+
+## USA map
+get_mapAthelets(dsin = records_athletics_all2, varin = "Athlete_profile", country_baseline = "Ethiopian", 
+                db_sel = "usa", lon_in = "lon_city", lat_in = "lat_city")
 
