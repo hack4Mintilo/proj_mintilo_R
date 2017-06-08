@@ -51,18 +51,22 @@ records_athletics_all <- records_athletics_all[, c("Event", "Athlete", "comp_doo
 # records_athletics_short <- records_athletics_short[order(records_athletics_short$year), ]
 records_athletics_all <- records_athletics_all[order(records_athletics_all$year), ]
 
+png("./outputs/plots/distribution_of_records_by_sex_and_distance.png")
+
 ## -- option-1
 # qplot(x = year, y = distance, data = records_athletics_all, geom = "line")
 main_plt <- ggplot(data = records_athletics_all, 
                    aes(year, distance, 
                        colour = Athlete_profile,
                        group = Athlete_profile)) + geom_line() + xlab("Year") + ylab("Distance")
-main_plt
+# main_plt
 
 # Divide by levels of "distance_category", in the horizontal direction
 # main_plt + facet_grid(distance_category ~ sex) 
 final_plt <- main_plt + facet_wrap(distance_category ~ sex, ncol = 2, scales = "free")
 final_plt
+
+dev.off()
 
 ## -- save the plot
 # ggsave("./outputs/plots/plt_distribution_records_by_sex_and_distance-category.png", 
@@ -71,8 +75,8 @@ final_plt
 # ggsave("./outputs/plots/plt_distribution_records_by_sex_and_distance-category_pdf.pdf", 
 #        final_plt, scale = 2, device = "pdf")
 
-ggsave("./outputs/plots/plt_distribution_records_by_sex_and_distance-category.png", 
-       final_plt, width = 30, height = 20, units = "cm")
+# ggsave("./outputs/plots/plt_distribution_records_by_sex_and_distance-category.png", 
+#        final_plt, width = 30, height = 20, units = "cm")
 
 
 ## ------------------------------------------------------------------------ ##
